@@ -35,14 +35,14 @@ async fn main() {
     };
     // 将http重定向为https
     tokio::spawn(redirect_http_to_https(ports));
-    // 加入openssl 证书
+    // 加入openssl 证书 和私钥
     let config = RustlsConfig::from_pem_file(
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("self_signed_certs")
-            .join("cert.pem"),
+            .join("certificate.pem"),
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("self_signed_certs")
-            .join("key.pem"),
+            .join("private_key.pem"),
     )
         .await
         .unwrap();
@@ -90,7 +90,7 @@ async fn redirect_http_to_https(ports: Ports) {
             }
         }
     };
-    // 在http的路由上重定向到https，相当于还要启动一个https的服务
+    // 启动http服务
     let addr = SocketAddr::new(IpAddr::from([127,0,0,1]),ports.http);
     axum::Server::bind(&addr)
         .serve(redirect.into_make_service()).await.unwrap();
